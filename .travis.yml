@@ -5,6 +5,7 @@ addons:
       - bash
       - wget
       - diffutils
+      - make
 install:
   - pip install -r requirements.txt
 script:
