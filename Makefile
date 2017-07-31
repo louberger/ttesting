@@ -33,6 +33,7 @@ NEW          = $(ID_DIR)/$(DRAFT)-$(REV)
 all:	$(DRAFT).txt $(DRAFT).html
 
 vars:
+	echo WITHXML2RFC=$(WITHXML2RFC)
 	echo PYTHONPATH=$(PYTHONPATH)
 	echo PLUGPATH=$(PLUGPATH)
 	echo PREV_REV=$(PREV_REV)
