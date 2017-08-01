@@ -16,17 +16,18 @@ REV	    := $(word 2, $(REVS))
 OLD          = $(ID_DIR)/$(DRAFT)-$(PREV_REV)
 NEW          = $(ID_DIR)/$(DRAFT)-$(REV)
 
+SHELL	     = bash
 
 %.txt: %.xml
 	@if [ $(WITHXML2RFC) == 0 ] ; then 	\
-		rm -f $@.prev; cp -pf $@ $@.prev ; \
+		rm -f $@.prev; cp -pf $@ $@.prev > /dev/null 2>&1 ; \
 		xml2rfc $< 			; \
-		diff $@.prev $@ || exit 0 	; \
+		if [ -f $@.prev ] ; then diff $@.prev $@ || exit 0 ; fi ; \
 	fi
 
 %.html: %.xml
 	@if [ $(WITHXML2RFC) == 0 ] ; then 	\
-		rm -f $@.prev; cp -pf $@ $@.prev ; \
+		rm -f $@.prev; cp -pf $@ $@.prev > /dev/null 2>&1 ; \
 		xml2rfc --html $< 		; \
 	fi
 
@@ -56,7 +57,7 @@ idnits: $(DRAFT).txt
 		wget http://tools.ietf.org/tools/idnits/idnits	;\
 		chmod 755 idnits				;\
 	fi
-	idnits $(DRAFT).txt
+	./idnits $(DRAFT).txt
 
 id: $(DRAFT).txt $(DRAFT).html
 	@if [ ! -e $(ID_DIR) ] ; then \
