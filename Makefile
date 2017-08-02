@@ -3,36 +3,46 @@
 #The author makes no claim/restriction on use.  It is provided "AS IS".
 #This file is considered a hack and not production grade by the author
 
-DRAFT  = draft-ietf-manet-dlep-pause-extension
+DRAFT_BASE  = draft-ietf-manet-dlep-pause-extension
+DRAFT 	    = out/$(DRAFT_BASE)
 
 WITHXML2RFC := $(shell which xml2rfc > /dev/null 2>&1 ; echo $$? )
 
 ID_DIR	     = IDs
 REVS	    := $(shell \
-		 sed -e '/docName="/!d;s/.*docName="\([^"]*\)".*/\1/' $(DRAFT).xml | \
+		 sed -e '/docName="/!d;s/.*docName="\([^"]*\)".*/\1/' $(DRAFT_BASE).xml | \
 		 awk -F- '{printf "%02d %02d",$$NF-1,$$NF}')
 PREV_REV    := $(word 1, $(REVS))
 REV	    := $(word 2, $(REVS))
-OLD          = $(ID_DIR)/$(DRAFT)-$(PREV_REV)
-NEW          = $(ID_DIR)/$(DRAFT)-$(REV)
+OLD          = $(ID_DIR)/$(DRAFT_BASE)-$(PREV_REV)
+NEW          = $(ID_DIR)/$(DRAFT_BASE)-$(REV)
 
 SHELL	     = bash
 
-%.txt: %.xml
+out/%.txt: %.xml
+	@if [ ! -e out ] ; then mkdir out ; git add out ; fi
 	@if [ $(WITHXML2RFC) == 0 ] ; then 	\
 		rm -f $@.prev; cp -pf $@ $@.prev > /dev/null 2>&1 ; \
-		xml2rfc $< 			; \
+		xml2rfc $< -o $@		; \
 		if [ -f $@.prev ] ; then diff $@.prev $@ || exit 0 ; fi ; \
 	fi
 
-%.html: %.xml
+out/%.html: %.xml
+	@if [ ! -e out ] ; then mkdir out ; git add out ; fi
 	@if [ $(WITHXML2RFC) == 0 ] ; then 	\
 		rm -f $@.prev; cp -pf $@ $@.prev > /dev/null 2>&1 ; \
-		xml2rfc --html $< 		; \
+		xml2rfc --html $< -o $@		; \
 	fi
 
 all:	$(DRAFT).txt $(DRAFT).html
 
+publish: idnits
+	@if git status -s out == "?? out/" ; then \
+		git add out ; \
+		git commit -m "Added dynamic output directory" out ;\
+		fi
+
+#for testing
 vars:
 	which xml2rfc
 	echo WITHXML2RFC=$(WITHXML2RFC)
@@ -57,7 +67,10 @@ idnits: $(DRAFT).txt
 		wget http://tools.ietf.org/tools/idnits/idnits	;\
 		chmod 755 idnits				;\
 	fi
-	./idnits $(DRAFT).txt
+	@if [ ! -e out ] ; then mkdir out ; git add out ; fi
+	./idnits $(DRAFT).txt > out/$@.out
+	@cat out/$@.out
+	@grep -q 'Summary: 0 error' out/$@.out
 
 id: $(DRAFT).txt $(DRAFT).html
 	@if [ ! -e $(ID_DIR) ] ; then \
@@ -68,15 +81,15 @@ id: $(DRAFT).txt $(DRAFT).html
 	@if [ -f "$(NEW).xml" ] ; then \
 		echo "" 				;\
 		echo "$(NEW).xml already exists, not overwriting!" ;\
-		diff -sq $(DRAFT).xml  $(NEW).xml 	;\
+		diff -sq $(DRAFT_BASE).xml  $(NEW).xml 	;\
 		echo "" 				;\
 	else \
 		echo "Copying to $(NEW).{xml,txt,html}" ;\
 		echo "" 				;\
-		cp -p $(DRAFT).xml $(NEW).xml  		;\
+		cp -p $(DRAFT_BASE).xml $(NEW).xml  		;\
 		cp -p $(DRAFT).txt $(NEW).txt  		;\
 		cp -p $(DRAFT).html $(NEW).html  	;\
-		git add $(NEW).xml $(NEW).txt  $(NEW).html ;\
+		git add $(NEW).xml $(NEW).txt $(NEW).html ;\
 		ls -lt $(DRAFT).* $(NEW).* 		;\
 	fi
 
@@ -87,5 +100,4 @@ rmid:
 	@read t
 	@rm -f $(NEW).xml $(NEW).txt $(NEW).html
 	@git rm  $(NEW).xml $(NEW).txt $(NEW).html
-
 
