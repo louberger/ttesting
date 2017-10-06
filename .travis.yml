@@ -6,7 +6,6 @@ addons:
       - wget
       - diffutils
       - make
-      - git
 install:
   - pip install -r requirements.txt
   - git clone https://github.com/YangModels/yang.git ../yang
