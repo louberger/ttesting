@@ -80,7 +80,7 @@ vars:
 
 $(DRAFT).xml: $(YANGIMPORT_BASE) $(MODELS)
 	@rm -f $@.prev; cp -p $@ $@.prev
-	@for model in $? ; do \
+	@for model in $? ; do if [ "$$model" != "$(YANGIMPORT_BASE)" ] ; then \
 		rm -f $@.tmp; cp -p $@ $@.tmp	 		 	; \
 		echo Updating $@ based on $$model		 	; \
 		base=`echo $$model | cut -d. -f 1` 		 	; \
@@ -95,7 +95,7 @@ $(DRAFT).xml: $(YANGIMPORT_BASE) $(MODELS)
 		cat $$model					>> $@	; \
 		tail -n +$${start_stop[1]} $@.tmp 		>> $@	; \
 		rm -f $@.tmp 		 				; \
-	done
+	fi ; done
 	diff -bw $@.prev $@ || exit 0
 
 
