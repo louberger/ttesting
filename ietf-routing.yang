@@ -1,0 +1,634 @@
+module ietf-routing {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:ietf-routing";
+  prefix rt;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import ietf-interfaces {
+    prefix if;
+  }
+
+  organization
+    "IETF NETMOD (NETCONF Data Modeling Language) Working Group";
+  contact
+    "WG Web:   <https://datatracker.ietf.org/wg/netmod/>
+     WG List:  <mailto:netmod@ietf.org>
+
+     WG Chair: Lou Berger
+               <mailto:lberger@labn.net>
+
+     WG Chair: Kent Watsen
+               <mailto:kwatsen@juniper.net>
+
+     Editor:   Ladislav Lhotka
+               <mailto:lhotka@nic.cz>
+
+     Editor:   Acee Lindem
+               <mailto:acee@cisco.com>";
+  description
+    "This YANG module defines essential components for the
+     management of a routing subsystem.
+
+     Copyright (c) 2016 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject to
+     the license terms contained in, the Simplified BSD License set
+     forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
+
+     The key words 'MUST', 'MUST NOT', 'REQUIRED', 'SHALL', 'SHALL
+     NOT', 'SHOULD', 'SHOULD NOT', 'RECOMMENDED', 'MAY', and
+     'OPTIONAL' in the module text are to be interpreted as
+     described in RFC 2119.
+
+     This version of this YANG module is part of RFC TBD;
+     see the RFC itself for full legal notices.";
+
+  revision 2017-10-05 {
+    description
+      "Deprecated revision.";
+    reference "RFC TBD: Revised YANG Data Model for Routing
+               Management";
+  }
+
+  feature multiple-ribs {
+    status deprecated;
+    description
+      "This feature indicates that the server supports user-defined
+       RIBs.
+
+       Servers that do not advertise this feature SHOULD provide
+       exactly one system-controlled RIB per supported address
+       family and make it also the default RIB.  This RIB then
+       appears as an entry of the list /routing-state/ribs/rib.";
+  }
+
+  feature router-id {
+    status deprecated;
+    description
+      "This feature indicates that the server supports
+       configuration of an explicit 32-bit router ID that is used
+       by some routing protocols.
+
+       Servers that do not advertise this feature set a router ID
+       algorithmically, usually to one of the configured IPv4
+       addresses.  However, this algorithm is implementation
+       specific.";
+  }
+
+  identity address-family {
+    status deprecated;
+    description
+      "Base identity from which identities describing address
+       families are derived.";
+  }
+
+  identity ipv4 {
+    base address-family;
+    status deprecated;
+    description
+      "This identity represents IPv4 address family.";
+  }
+
+  identity ipv6 {
+    base address-family;
+    status deprecated;
+    description
+      "This identity represents IPv6 address family.";
+  }
+
+  identity control-plane-protocol {
+    status deprecated;
+    description
+      "Base identity from which control-plane protocol identities
+       are derived.";
+  }
+
+  identity routing-protocol {
+    base control-plane-protocol;
+    status deprecated;
+    description
+      "Identity from which Layer 3 routing protocol identities are
+       derived.";
+  }
+
+  identity direct {
+    base routing-protocol;
+    status deprecated;
+    description
+      "Routing pseudo-protocol that provides routes to directly
+       connected networks.";
+  }
+
+  identity static {
+    base routing-protocol;
+    status deprecated;
+    description
+      "Static routing pseudo-protocol.";
+  }
+
+  typedef route-preference {
+    type uint32;
+    status deprecated;
+    description
+      "This type is used for route preferences.";
+  }
+
+  grouping address-family {
+    status deprecated;
+    description
+      "This grouping provides a leaf identifying an address
+       family.";
+    leaf address-family {
+      type identityref {
+        base address-family;
+      }
+      mandatory true;
+      status deprecated;
+      description
+        "Address family.";
+    }
+  }
+
+  grouping router-id {
+    status deprecated;
+    description
+      "This grouping provides router ID.";
+    leaf router-id {
+      type yang:dotted-quad;
+      status deprecated;
+      description
+        "A 32-bit number in the form of a dotted quad that is used
+         by some routing protocols identifying a router.";
+      reference "RFC 2328: OSPF Version 2.";
+    }
+  }
+
+  grouping special-next-hop {
+    status deprecated;
+    description
+      "This grouping provides a leaf with an enumeration of special
+       next hops.";
+    leaf special-next-hop {
+      type enumeration {
+        enum "blackhole" {
+          status deprecated;
+          description
+            "Silently discard the packet.";
+        }
+        enum "unreachable" {
+          status deprecated;
+          description
+            "Discard the packet and notify the sender with an error
+             message indicating that the destination host is
+             unreachable.";
+        }
+        enum "prohibit" {
+          status deprecated;
+          description
+            "Discard the packet and notify the sender with an error
+             message indicating that the communication is
+             administratively prohibited.";
+        }
+        enum "receive" {
+          status deprecated;
+          description
+            "The packet will be received by the local system.";
+        }
+      }
+      status deprecated;
+      description
+        "Options for special next hops.";
+    }
+  }
+
+  grouping next-hop-content {
+    status deprecated;
+    description
+      "Generic parameters of next hops in static routes.";
+    choice next-hop-options {
+      mandatory true;
+      status deprecated;
+      description
+        "Options for next hops in static routes.
+
+         It is expected that further cases will be added through
+         augments from other modules.";
+      case simple-next-hop {
+        status deprecated;
+        description
+          "This case represents a simple next hop consisting of the
+           next-hop address and/or outgoing interface.
+
+           Modules for address families MUST augment this case with
+           a leaf containing a next-hop address of that address
+           family.";
+        leaf outgoing-interface {
+          type if:interface-ref;
+          status deprecated;
+          description
+            "Name of the outgoing interface.";
+        }
+      }
+      case special-next-hop {
+        status deprecated;
+        uses special-next-hop;
+      }
+      case next-hop-list {
+        status deprecated;
+        container next-hop-list {
+          status deprecated;
+          description
+            "Container for multiple next-hops.";
+          list next-hop {
+            key "index";
+            status deprecated;
+            description
+              "An entry of a next-hop list.
+
+               Modules for address families MUST augment this list
+               with a leaf containing a next-hop address of that
+               address family.";
+            leaf index {
+              type string;
+              status deprecated;
+              description
+                "A user-specified identifier utilized to uniquely
+                 reference the next-hop entry in the next-hop list.
+                 The value of this index has no semantic meaning
+                 other than for referencing the entry.";
+            }
+            leaf outgoing-interface {
+              type if:interface-ref;
+              status deprecated;
+              description
+                "Name of the outgoing interface.";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  grouping next-hop-state-content {
+    status deprecated;
+    description
+      "Generic parameters of next hops in state data.";
+    choice next-hop-options {
+      mandatory true;
+      status deprecated;
+      description
+        "Options for next hops in state data.
+
+         It is expected that further cases will be added through
+         augments from other modules, e.g., for recursive
+         next hops.";
+      case simple-next-hop {
+        status deprecated;
+        description
+          "This case represents a simple next hop consisting of the
+           next-hop address and/or outgoing interface.
+
+           Modules for address families MUST augment this case with
+           a leaf containing a next-hop address of that address
+           family.";
+        leaf outgoing-interface {
+          type if:interface-state-ref;
+          status deprecated;
+          description
+            "Name of the outgoing interface.";
+        }
+      }
+      case special-next-hop {
+        status deprecated;
+        uses special-next-hop;
+      }
+      case next-hop-list {
+        status deprecated;
+        container next-hop-list {
+          status deprecated;
+          description
+            "Container for multiple next hops.";
+          list next-hop {
+            status deprecated;
+            description
+              "An entry of a next-hop list.
+
+               Modules for address families MUST augment this list
+               with a leaf containing a next-hop address of that
+               address family.";
+            leaf outgoing-interface {
+              type if:interface-state-ref;
+              status deprecated;
+              description
+                "Name of the outgoing interface.";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  grouping route-metadata {
+    status deprecated;
+    description
+      "Common route metadata.";
+    leaf source-protocol {
+      type identityref {
+        base routing-protocol;
+      }
+      mandatory true;
+      status deprecated;
+      description
+        "Type of the routing protocol from which the route
+         originated.";
+    }
+    leaf active {
+      type empty;
+      status deprecated;
+      description
+        "Presence of this leaf indicates that the route is
+         preferred among all routes in the same RIB that have the
+         same destination prefix.";
+    }
+    leaf last-updated {
+      type yang:date-and-time;
+      status deprecated;
+      description
+        "Time stamp of the last modification of the route.  If the
+         route was never modified, it is the time when the route
+         was inserted into the RIB.";
+    }
+  }
+
+  container routing-state {
+    config false;
+    status deprecated;
+    description
+      "State data of the routing subsystem.";
+    uses router-id {
+      status deprecated;
+      description
+        "Global router ID.
+
+         It may be either configured or assigned algorithmically by
+         the implementation.";
+    }
+    container interfaces {
+      status deprecated;
+      description
+        "Network-layer interfaces used for routing.";
+      leaf-list interface {
+        type if:interface-state-ref;
+        status deprecated;
+        description
+          "Each entry is a reference to the name of a configured
+           network-layer interface.";
+      }
+    }
+    container control-plane-protocols {
+      status deprecated;
+      description
+        "Container for the list of routing protocol instances.";
+      list control-plane-protocol {
+        key "type name";
+        status deprecated;
+        description
+          "State data of a control-plane protocol instance.
+
+           An implementation MUST provide exactly one
+           system-controlled instance of the 'direct'
+           pseudo-protocol.  Instances of other control-plane
+           protocols MAY be created by configuration.";
+        leaf type {
+          type identityref {
+            base control-plane-protocol;
+          }
+          status deprecated;
+          description
+            "Type of the control-plane protocol.";
+        }
+        leaf name {
+          type string;
+          status deprecated;
+          description
+            "The name of the control-plane protocol instance.
+
+             For system-controlled instances this name is
+             persistent, i.e., it SHOULD NOT change across
+             reboots.";
+        }
+      }
+    }
+    container ribs {
+      status deprecated;
+      description
+        "Container for RIBs.";
+      list rib {
+        key "name";
+        min-elements 1;
+        status deprecated;
+        description
+          "Each entry represents a RIB identified by the 'name'
+           key. All routes in a RIB MUST belong to the same address
+           family.
+
+           An implementation SHOULD provide one system-controlled
+           default RIB for each supported address family.";
+        leaf name {
+          type string;
+          status deprecated;
+          description
+            "The name of the RIB.";
+        }
+        uses address-family;
+        leaf default-rib {
+          if-feature "multiple-ribs";
+          type boolean;
+          default "true";
+          status deprecated;
+          description
+            "This flag has the value of 'true' if and only if the
+             RIB is the default RIB for the given address family.
+
+             By default, control-plane protocols place their routes
+             in the default RIBs.";
+        }
+        container routes {
+          status deprecated;
+          description
+            "Current content of the RIB.";
+          list route {
+            status deprecated;
+            description
+              "A RIB route entry.  This data node MUST be augmented
+               with information specific for routes of each address
+               family.";
+            leaf route-preference {
+              type route-preference;
+              status deprecated;
+              description
+                "This route attribute, also known as administrative
+                 distance, allows for selecting the preferred route
+                 among routes with the same destination prefix.  A
+                 smaller value means a more preferred route.";
+            }
+            container next-hop {
+              status deprecated;
+              description
+                "Route's next-hop attribute.";
+              uses next-hop-state-content;
+            }
+            uses route-metadata;
+          }
+        }
+        action active-route {
+          status deprecated;
+          description
+            "Return the active RIB route that is used for the
+             destination address.
+
+             Address-family-specific modules MUST augment input
+             parameters with a leaf named 'destination-address'.";
+          output {
+            container route {
+              status deprecated;
+              description
+                "The active RIB route for the specified
+                 destination.
+
+                 If no route exists in the RIB for the destination
+                 address, no output is returned.
+
+                 Address-family-specific modules MUST augment this
+                 container with appropriate route contents.";
+              container next-hop {
+                status deprecated;
+                description
+                  "Route's next-hop attribute.";
+                uses next-hop-state-content;
+              }
+              uses route-metadata;
+            }
+          }
+        }
+      }
+    }
+  }
+  container routing {
+    status deprecated;
+    description
+      "Configuration parameters for the routing subsystem.";
+    uses router-id {
+      if-feature "router-id";
+      status deprecated;
+      description
+        "Configuration of the global router ID.  Routing protocols
+         that use router ID can use this parameter or override it
+         with another value.";
+    }
+    container control-plane-protocols {
+      status deprecated;
+      description
+        "Configuration of control-plane protocol instances.";
+      list control-plane-protocol {
+        key "type name";
+        status deprecated;
+        description
+          "Each entry contains configuration of a control-plane
+           protocol instance.";
+        leaf type {
+          type identityref {
+            base control-plane-protocol;
+          }
+          status deprecated;
+          description
+            "Type of the control-plane protocol - an identity
+             derived from the 'control-plane-protocol' base
+             identity.";
+        }
+        leaf name {
+          type string;
+          status deprecated;
+          description
+            "An arbitrary name of the control-plane protocol
+             instance.";
+        }
+        leaf description {
+          type string;
+          status deprecated;
+          description
+            "Textual description of the control-plane protocol
+             instance.";
+        }
+        container static-routes {
+          when "derived-from-or-self(../type, 'rt:static')" {
+            description
+              "This container is only valid for the 'static'
+               routing protocol.";
+          }
+          status deprecated;
+          description
+            "Configuration of the 'static' pseudo-protocol.
+
+             Address-family-specific modules augment this node with
+             their lists of routes.";
+        }
+      }
+    }
+    container ribs {
+      status deprecated;
+      description
+        "Configuration of RIBs.";
+      list rib {
+        key "name";
+        status deprecated;
+        description
+          "Each entry contains configuration for a RIB identified
+           by the 'name' key.
+
+           Entries having the same key as a system-controlled entry
+           of the list /routing-state/ribs/rib are used for
+           configuring parameters of that entry.  Other entries
+           define additional user-controlled RIBs.";
+        leaf name {
+          type string;
+          status deprecated;
+          description
+            "The name of the RIB.
+
+             For system-controlled entries, the value of this leaf
+             must be the same as the name of the corresponding
+             entry in state data.
+
+             For user-controlled entries, an arbitrary name can be
+             used.";
+        }
+        uses address-family {
+          status deprecated;
+          description
+            "Address family of the RIB.
+
+             It is mandatory for user-controlled RIBs.  For
+             system-controlled RIBs it can be omitted; otherwise,
+             it must match the address family of the corresponding
+             state entry.";
+          refine "address-family" {
+            mandatory false;
+          }
+        }
+        leaf description {
+          type string;
+          status deprecated;
+          description
+            "Textual description of the RIB.";
+        }
+      }
+    }
+  }
+}
